@@ -15,6 +15,7 @@ class FirstFit:
         else:
             # try to find the first server that can process the job
             for m in servers:
+                # Ελέγχουμε αν η εργασία χωράει στο server.
                 if m.check_fit(job):
                     m.add_job(job)
                     return 

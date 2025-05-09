@@ -10,7 +10,6 @@ def duration_with_nLOW(job, alpha, n, sigma):
 # Υπολογισμός της νέας διάρκειας μιας εργασίας,
 # με βάση ένα συγκεκριμένο αριθμό πυρήνων n, σύμφωνα με ένα high-variance μοντέλο.
 def duration_with_nHIGH(job, alpha, n, sigma):
-    
     initialSpeedup = speedupHIGH(n = job.req, alpha = alpha, sigma = sigma)
     newSpeedup = speedupHIGH(n = n, alpha = alpha, sigma = sigma)
     speedupRatio = initialSpeedup / newSpeedup
@@ -18,6 +17,8 @@ def duration_with_nHIGH(job, alpha, n, sigma):
 
 
 # Υπολογισμός του speedup μιας εργασίας, σύμφωνα με ένα low-variance μοντέλο.
+# Το speedup  μετρά πόσο γρηγορότερα εκτελείται μια εργασία όταν τρέχει σε πολλαπλούς πυρίνες,
+# σε σύγκριση με την εκτέλεσή του σε έναν μόνο πυρίνα.
 def speedupLOW(n, alpha, sigma):
     if 1 <= n <= alpha: return (alpha * n) / (alpha + (sigma / 2) * (n - 1))
 

@@ -53,7 +53,7 @@ class General_MS:
             if eligibleServers:
                 # Βρίσκουμε το σετ (server, s), για το οποίο ελεχιστοποιείται το workload(χρόνος ολοκλήρωσης * s πυρήνες).
                 minPair = eligibleServers[0]
-                minProduct = minPair[1] * self.calculateDur(job, minPair[1])
+                minProduct = minPair[0] * self.calculateDur(job, minPair[1])
 
                 for row in eligibleServers[1:]:
                     currentProduct = row[1] * self.calculateDur(job, row[1])

@@ -59,6 +59,10 @@ class Scheduler:
                 from Environment.Algorithms.BF_mat import BF_MAT
                 self.alg = "BFAT"
                 self.algorithm = BF_MAT(self)
+            case 'Improved_MS':
+                from Environment.Algorithms.Improved_MS import Improved_MS
+                self.alg = 'Improved_MS'
+                self.algorithm = Improved_MS(self)
             case _:
                 raise ValueError(f"'{alg}' is not a supported algorithm.")
             
@@ -97,7 +101,7 @@ class Scheduler:
         
         if close_empty:
             self.servers = [x for x in self.servers if x not in remove_list]
-            
+
     def run(self, jobs):
         for j in jobs:
             self.update_all(j.ar, close_empty=True)
