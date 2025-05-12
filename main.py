@@ -5,7 +5,7 @@ def main(config):
     # initialise a scheduler (effectively our simulation environment)
     sch = Scheduler(config['wl'], config['cores'], config['alg'])
 
-    # returns a list of all the jobs in the workload([arrival, wait_for, duration, requirements])
+    # returns a list of all the jobs in the workload([arrival, finish time, duration, requirements])
     jobs = f.parse_workload(config['wl'], cluster=config['cluster'], cores=config['cores'])
 
     # schedules the workload

@@ -1,2 +1,3 @@
 Αλλαγές:
-- Προσθήκη αρχείων General_MS.py, Improved_MS.py, MoldableTasks.py, Moldable_task_model.
+- Προσθήκη αρχείων Improved_MS.py και Moldable_task_model.
+- Ο Improved_MS.py αναπαριστά τον αλγόριθμο 2 απ' το "Online scheduling of moldable parallel tasks". 

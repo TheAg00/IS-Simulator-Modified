@@ -16,7 +16,6 @@ class Improved_MS:
         self.beta = 1.56
         self.r = 1.44
         self.makespan = 0
-        self.firstJob = True
 
     # Δημιουργούμε νέο server.
     def new_server(self, job):
@@ -64,17 +63,18 @@ class Improved_MS:
 
         return job
 
-    def pack(self, job, servers = None, openNew = True):
-        # moldedJobDict = self.convert_to_mold(job)
+    def pack(self, job, firstJob = False, servers = None, openNew = True):
+        moldedJobDict = self.convert_to_mold(job)
 
         if servers == None: servers = self.scheduler.servers
 
         self.moldedJobhistory["before"].append([job.dur, job.req])
 
-        if self.firstJob:
+        if firstJob:
             self.alpha = min(moldedJobDict.values()) # Ο ελάχιστος χρόνος ολοκλήρωσης της 1ης εργασίας.
+            self.alpha = round(self.alpha, 2)
             self.makespan = self.alpha
-            self.firstJob = False
+        
 
         w = 0
         i = 1
@@ -101,8 +101,6 @@ class Improved_MS:
                 self.new_server(job)
                 newServer = self.scheduler.servers[-1]
                 self.coreCapacity.update({newServer: newServer.capacity})
-                
-
 
             # Αν ο συνολικός χρόνος ολοκλήρωσης της φάσης είναι <= του α * (αριθμό των πυρήνων) και βρέθηκαν eligible servers,
             # τότε γίνεται ο προγραμματισμός της εργασίας. 
@@ -134,8 +132,8 @@ class Improved_MS:
                 self.moldedJobhistory["after"].append([minProcessingTime, minCores])
 
                 break
-
-            self.alpha *= self.beta
+            
+            self.alpha = self.alpha * self.beta
             i += 1
             w = 0
 
