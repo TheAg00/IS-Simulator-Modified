@@ -22,7 +22,7 @@ class Improved_MS:
         self.scheduler.add_server(job)
 
     # Για κάθε server, ελέγχουμε για έναν διαφορετικό αριθμό πυρήνων s το χρόνο ολοκλήρωσης της εργασίας job.
-    # Αν ο χρόνος ολοκλήρωσης είναι <= a[i], τότε προσθέτουμε ένα σετ (server, s) στη λίστα με τα servers που πληρούν τις προϋποθέσεις.
+    # Αν ο χρόνος ολοκλήρωσης είναι <= α, τότε προσθέτουμε ένα σετ (server, s) στη λίστα με τα servers που πληρούν τις προϋποθέσεις.
     def f(self, job):
         eligibleServers = list()
         for server in self.scheduler.servers:
