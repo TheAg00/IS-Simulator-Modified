@@ -6,6 +6,7 @@ class FirstFit:
         self.scheduler.add_server(job)
 
     def pack(self, job, servers=None):
+        
         if servers is None:
             servers = self.scheduler.servers
         

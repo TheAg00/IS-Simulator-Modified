@@ -103,15 +103,6 @@ class Scheduler:
             self.servers = [x for x in self.servers if x not in remove_list]
 
     def run(self, jobs):
-        # Για τον Improved_MS, χρειάζεται να βρούμε το 'α', όπου έχει την τιμή του ελάχιστου χρόνου ολοκλήρωσης για s πυρήνες.
-        # Οπότε, για την 1η εργασία καλούμε τον αλγόριθμο με τη μεταβλητή firstJob = True, ώστε να βρίσκει το 'α' μόνο για αυτήν την εργασία
-        # 
-        if self.alg == 'Improved_MS':
-            jobs = iter(jobs)
-            j = next(jobs)
-            self.update_all(j.ar, close_empty=True)
-            self.algorithm.pack(j, firstJob = True)
-
         for j in jobs:
             self.update_all(j.ar, close_empty=True)
             self.algorithm.pack(j)
