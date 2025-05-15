@@ -59,9 +59,13 @@ class Scheduler:
                 from Environment.Algorithms.BF_mat import BF_MAT
                 self.alg = "BFAT"
                 self.algorithm = BF_MAT(self)
-            case 'Improved_MS':
+            case 'Improved_MS_Varaince_LOW':
                 from Environment.Algorithms.Improved_MS import Improved_MS
-                self.alg = 'Improved_MS'
+                self.alg = 'Improved_MS_Varaince_LOW'
+                self.algorithm = Improved_MS(self)
+            case 'Improved_MS_Varaince_HIGH':
+                from Environment.Algorithms.Improved_MS import Improved_MS
+                self.alg = 'Improved_MS_Varaince_HIGH'
                 self.algorithm = Improved_MS(self)
             case _:
                 raise ValueError(f"'{alg}' is not a supported algorithm.")

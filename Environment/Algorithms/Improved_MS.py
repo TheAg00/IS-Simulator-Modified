@@ -6,7 +6,7 @@ import math
 class Improved_MS:
     def __init__(self, scheduler):
         self.scheduler = scheduler
-        self.varianceModel = "low"
+        self.varianceModel = "low" if self.scheduler.alg == 'Improved_MS_Varaince_LOW' else "high"
         self.coreCapacity = {server: server.cores for server in self.scheduler.servers}
 
         self.shelves = []
@@ -32,7 +32,7 @@ class Improved_MS:
                 sigma = random.uniform(0, 1)
                 newDur = math.ceil(duration_with_nLOW(job, averageParallelism, currentCores, sigma))
             else:
-                sigma = random.uniform(1.01, 10)
+                sigma = random.uniform(1.01, 10_000)
                 newDur = math.ceil(duration_with_nHIGH(job, averageParallelism, currentCores, sigma))
 
             moldedJobDict.update({currentCores: newDur})
@@ -45,7 +45,7 @@ class Improved_MS:
     def f(self, job):
         eligibleServers = list()
         for server in self.scheduler.servers:
-            for s in range(1, self.coreCapacity[server] + 1):
+            for s in range(1, self.scheduler.cores + 1):
                 if  job[s] <= self.alpha:
                     eligibleServers.append(s)
         

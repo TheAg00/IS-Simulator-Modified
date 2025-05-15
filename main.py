@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     for wl in range(0, 16):
         print(f'WL:{wl:<5}', end='', flush=True)
-        for alg in ['FF', 'MET_AD', 'BF', 'HFF', 'BFMAT', 'Improved_MS']:
+        for alg in ['FF', 'MET_AD', 'BF', 'HFF', 'BFMAT', 'Improved_MS_Varaince_LOW', 'Improved_MS_Varaince_HIGH']:
             config = {
                 "wl": wl,
                 "cores": cores,
