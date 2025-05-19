@@ -32,7 +32,7 @@ class Improved_MS:
                 sigma = random.uniform(0, 1)
                 newDur = math.ceil(duration_with_nLOW(job, averageParallelism, currentCores, sigma))
             else:
-                sigma = random.uniform(1.01, 10_000)
+                sigma = random.uniform(1.01, 10)
                 newDur = math.ceil(duration_with_nHIGH(job, averageParallelism, currentCores, sigma))
 
             moldedJobDict.update({currentCores: newDur})
@@ -42,11 +42,19 @@ class Improved_MS:
 
     # Για κάθε server, ελέγχουμε για έναν διαφορετικό αριθμό πυρήνων s το χρόνο ολοκλήρωσης της εργασίας job.
     # Αν ο χρόνος ολοκλήρωσης είναι <= α, τότε προσθέτουμε ένα σετ (server, s) στη λίστα με τα servers που πληρούν τις προϋποθέσεις.
-    def f(self, job):
+    def f(self, moldedJobDict, job):
         eligibleServers = list()
+        
+        if not self.scheduler.servers:
+            for s in range(1, self.scheduler.cores + 1):
+                if  moldedJobDict[s] <= self.alpha:
+                    eligibleServers.append(s)
+            
+            return eligibleServers
+        
         for server in self.scheduler.servers:
             for s in range(1, self.scheduler.cores + 1):
-                if  job[s] <= self.alpha:
+                if  moldedJobDict[s] <= self.alpha:
                     eligibleServers.append(s)
         
         return eligibleServers
@@ -56,7 +64,7 @@ class Improved_MS:
         self.coreCapacity[server] -= usedCores
     
     def minCost(self, moldedJobDict, eligibleServers):
-        minCores = 1
+        minCores = eligibleServers[0]
         minProcessingTime = moldedJobDict[minCores]
         minProduct = minCores * minProcessingTime
 
@@ -108,36 +116,33 @@ class Improved_MS:
 
 
     def pack(self, job, servers = None, openNew = True):
-        moldedJobDict = self.convertMold(job) # {...,s_n: p(s_n, j), ...}
+        if servers == None: servers = self.scheduler.servers
 
+        moldedJobDict = self.convertMold(job) # {...,s_n: p(s_n, j), ...}
+        
         # Ο ελάχιστος χρόνος ολοκλήρωσης της 1ης εργασίας.
         if self.alpha is None: self.alpha = min(moldedJobDict.values())
 
-        if servers == None: servers = self.scheduler.servers
-
         # Άμα δεν υπάρχουν servers, βρίσκουμε τον αριθμό πυρήνων s όπου ελαχιστοποιούν το s * p(p = χρόνος εκτέλεσης εργασίας)
-        # και δημιουργούμε νέο server όπου θα βάλουμε αυτήν την εργασία.
-        if not servers:
-            eligibleServers = list()
-            for s in range(1, self.scheduler.cores + 1):
-                if  moldedJobDict[s] <= self.alpha:
-                    eligibleServers.append(s)
-            
-            # Κρατάμε τον αριθμό των πυρήνων που ελαχιστοποιούν το s * p και το χρόνο ολοκλήρωσης για αυτούς τους πυρήνες.
-            job.dur, job.req = self.minCost(moldedJobDict, eligibleServers) 
-
-            self.new_server(job)
-            newServer = self.scheduler.servers[-1]
-            self.coreCapacity.update({newServer: newServer.capacity})
-            return
+        # και δημιουργούμε νέο server όπου θα βάλουμε αυτήν την εργασία.    
         
         w = 0
         while True:
-            eligibleServers = self.f(moldedJobDict) # Όλοι οι πυρήνες s, όπου p(s, j) <= self.alpha
-
-            job.dur, job.req = self.minCost(moldedJobDict, eligibleServers)
+            eligibleServers = self.f(moldedJobDict, job) # Όλοι οι πυρήνες s, όπου p(s, j) <= self.alpha
             
-            w += job.dur * job.req # Αυξάνουμε το συνολικό χρόνο ολοκλήρωσης για τη συγκεκριμένη χρονική φάση.
+            # Αν δεν υπάρχουν διαθέσιμοι servers, ανοίγουμε έναν νέο και βάζουμε εκεί την εργασία.
+            if not self.scheduler.servers and eligibleServers:
+                # Κρατάμε τον αριθμό των πυρήνων που ελαχιστοποιούν το s * p και το χρόνο ολοκλήρωσης για αυτούς τους πυρήνες.
+                job.dur, job.req = self.minCost(moldedJobDict, eligibleServers) 
+
+                self.new_server(job)
+                newServer = self.scheduler.servers[-1]
+                self.coreCapacity.update({newServer: newServer.capacity})
+                return
+
+            if eligibleServers:
+                job.dur, job.req = self.minCost(moldedJobDict, eligibleServers)
+                w += job.dur * job.req # Αυξάνουμε το συνολικό χρόνο ολοκλήρωσης για τη συγκεκριμένη χρονική φάση.
 
             # Αν ο συνολικός χρόνος ολοκλήρωσης της φάσης είναι <= του α * (αριθμό των πυρήνων) και βρέθηκαν eligible servers,
             # τότε γίνεται ο προγραμματισμός της εργασίας. 
