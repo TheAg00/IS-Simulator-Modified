@@ -1,6 +1,7 @@
 from Environment.EdgeServer import edge_server
 import my_parser
 import functions as f
+from Environment.Algorithms.FirstFit import FirstFit
 
 from copy import deepcopy
 
@@ -109,8 +110,9 @@ class Scheduler:
             self.algorithm.pack(j)
 
         if self.alg == 'Improved_MS_Varaince_LOW' or self.alg == 'Improved_MS_Varaince_HIGH':
-            print(self.algorithm.shelves[0].height)
-            exit()
+            firstFit = FirstFit(self)
+            for shelf in self.algorithm.shelves:
+                firstFit.pack(shelf)
 
         for m in self.servers:
             self.total_bt += m.measure_remaining_busy_time()

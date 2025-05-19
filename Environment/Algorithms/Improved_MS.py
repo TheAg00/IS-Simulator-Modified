@@ -130,16 +130,6 @@ class Improved_MS:
         w = 0
         while True:
             eligibleServers = self.f(moldedJobDict, job) # Όλοι οι πυρήνες s, όπου p(s, j) <= self.alpha
-            
-            # Αν δεν υπάρχουν διαθέσιμοι servers, ανοίγουμε έναν νέο και βάζουμε εκεί την εργασία.
-            if not self.scheduler.servers and eligibleServers:
-                # Κρατάμε τον αριθμό των πυρήνων που ελαχιστοποιούν το s * p και το χρόνο ολοκλήρωσης για αυτούς τους πυρήνες.
-                job.dur, job.req = self.minCost(moldedJobDict, eligibleServers) 
-
-                self.new_server(job)
-                newServer = self.scheduler.servers[-1]
-                self.coreCapacity.update({newServer: newServer.capacity})
-                return
 
             if eligibleServers:
                 job.dur, job.req = self.minCost(moldedJobDict, eligibleServers)
@@ -160,8 +150,8 @@ class Shelf:
         self.remainingWidth = maxWidth
         self.jobs = []
 
-        self.ar
-        self.fin
+        self.ar = 0
+        self.fin = math.ceil(height)
         self.req = 0
 
     # Ελέγχει αν μια εργασία χωράει στο ράφι.
@@ -173,4 +163,3 @@ class Shelf:
         self.jobs.append(job)
         self.remainingWidth -= job.req
         self.req += job.req
-
