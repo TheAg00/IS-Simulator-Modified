@@ -109,6 +109,8 @@ class Scheduler:
             self.update_all(j.ar, close_empty=True)
             self.algorithm.pack(j)
 
+        # Ο Improved_MS αλγόριθμος δεν κάνει προγραμματισμό των εργασιών, αλλά τις κάνει moldable και τις βάζει σε ράφια.
+        # Οπότε καλούμε τον First Fit για να κάνει τον προγραμματισμό των ραφιών που υπάρχουν οι εργασίες. 
         if self.alg == 'Improved_MS_Varaince_LOW' or self.alg == 'Improved_MS_Varaince_HIGH':
             firstFit = FirstFit(self)
             for shelf in self.algorithm.shelves:

@@ -7,18 +7,12 @@ class Improved_MS:
     def __init__(self, scheduler):
         self.scheduler = scheduler
         self.varianceModel = "low" if self.scheduler.alg == 'Improved_MS_Varaince_LOW' else "high"
-        self.coreCapacity = {server: server.cores for server in self.scheduler.servers}
 
         self.shelves = []
         self.alpha = None
         self.beta = 1.56
         self.r = 1.44
         self.height = 0
-
-    # Δημιουργούμε νέο server.
-    def new_server(self, job):
-        self.scheduler.add_server(job)
-
 
     # Μετατρέπουμε την εργασία σε moldable.
     def convertMold(self, job):
@@ -40,38 +34,23 @@ class Improved_MS:
         
         return moldedJobDict
 
-    # Για κάθε server, ελέγχουμε για έναν διαφορετικό αριθμό πυρήνων s το χρόνο ολοκλήρωσης της εργασίας job.
-    # Αν ο χρόνος ολοκλήρωσης είναι <= α, τότε προσθέτουμε ένα σετ (server, s) στη λίστα με τα servers που πληρούν τις προϋποθέσεις.
+    # Ελέγχουμε για διαφορετικό αριθμό πυρήνων s το χρόνο ολοκλήρωσης της εργασίας job.
+    # Αν ο χρόνος ολοκλήρωσης είναι <= α, τότε προσθέτουμε το s στη λίστα με τους πυρήνες που πληρούν τις προϋποθέσεις.
     def f(self, moldedJobDict, job):
-        eligibleServers = list()
-
-        # Άμα δεν υπάρχουν servers, βρίσκουμε τον αριθμό πυρήνων s όπου ελαχιστοποιούν το s * p(p = χρόνος εκτέλεσης εργασίας)
-        # και ανοίγουμε νέο server όπου θα βάλουμε αυτήν την εργασία.
-        if not self.scheduler.servers:
-            for s in range(1, self.scheduler.cores + 1):
-                if  moldedJobDict[s] <= self.alpha:
-                    eligibleServers.append(s)
-            
-            return eligibleServers
+        eligibleCores = list()
+        for s in range(1, self.scheduler.cores + 1):
+            if  moldedJobDict[s] <= self.alpha:
+                eligibleCores.append(s)
         
-        for server in self.scheduler.servers:
-            for s in range(1, self.scheduler.cores + 1):
-                if  moldedJobDict[s] <= self.alpha:
-                    eligibleServers.append(s)
-        
-        return eligibleServers
-
-    # Ενημερώνουμε το νέο αριθμό διαθέσημων πυρήνων μετά τον προγραμματισμό της εργασίας.
-    def updateCoreCapacity(self, server, usedCores):
-        self.coreCapacity[server] -= usedCores
+        return eligibleCores
     
-    def minCost(self, moldedJobDict, eligibleServers):
-        minCores = eligibleServers[0]
+    # Βρίσκουμε τον αριμθό πυρήνων s και το χρόνο ολοκλήρωσης p, για τον οποίο ελαχιστοποιείται το s * p.
+    def minCost(self, moldedJobDict, eligibleCores):
+        minCores = eligibleCores[0]
         minProcessingTime = moldedJobDict[minCores]
         minProduct = minCores * minProcessingTime
 
-        # Βρίσκουμε τον αριμθό μηχανών για τον οποίο ελαχιστοποιείται το s * p(j, s).
-        for s in eligibleServers[1:]:
+        for s in eligibleCores[1:]:
             p = moldedJobDict[s]
             currentProduct = s * p
             if currentProduct < minProduct:
@@ -81,6 +60,7 @@ class Improved_MS:
 
         return minProcessingTime, minCores
 
+    # Τοποθετούμε την τρέχουσα εργασία στο κατάλληλο 'ράφι'.
     def packShelf(self, job):
         s = job.req
         p = job.dur
@@ -90,23 +70,22 @@ class Improved_MS:
             shelf = Shelf(p, self.scheduler.cores)
             shelf.add_job(job)
             self.shelves.append(shelf)
-            self.height += p
+            self.height += p # Αυξάνουμε το συνολικό ύψος όλων των ραφιών.
             return
 
 
         # Για μικρές εργασίες, βρίσκουμε έναν ακέραιο k, τέτοιο ώστε να ισχύει r ^ k < χρόνος ολοκλήρωσης εργασίας <= r ^ (k + 1).
-        # Η εργασία θα τοποθετηθεί σε ράφι ύψους r ^ (k + 1) χρησιμοποιώντας First Fit.
         k = 0
         while True:
             
             lowerBound = pow(self.r, k)
             upperBound = pow(self.r, k + 1)
 
-            # Αν υπάρχει εργασία που έχει χρόνο ολοκλήρωσης 1, τότε τοποθετείται στο ράφι με ύψος 1.44.
+            # Αν υπάρχει εργασία που έχει χρόνο ολοκλήρωσης 1, τότε τοποθετείται στο ράφι με ύψος 1.44(αποφεύγουμε ατέρμων βρόχο).
             if lowerBound < p <= upperBound or p == 1.0: break
             k += 1
 
-        # Εφαρμογή της First Fit.
+        # Η εργασία θα τοποθετηθεί στο 1ο διαθέσιμο ράφι ύψους r ^ (k + 1).
         for shelf in self.shelves:
             if math.isclose(shelf.height, upperBound) and shelf.shelfFit(s):
                 shelf.add_job(job)
@@ -129,15 +108,15 @@ class Improved_MS:
         
         w = 0
         while True:
-            eligibleServers = self.f(moldedJobDict, job) # Όλοι οι πυρήνες s, όπου p(s, j) <= self.alpha
+            eligibleCores = self.f(moldedJobDict, job) # Όλοι οι πυρήνες s, όπου p(s, j) <= self.alpha
 
-            if eligibleServers:
-                job.dur, job.req = self.minCost(moldedJobDict, eligibleServers)
+            if eligibleCores:
+                job.dur, job.req = self.minCost(moldedJobDict, eligibleCores)
                 w += job.dur * job.req # Αυξάνουμε το συνολικό χρόνο ολοκλήρωσης για τη συγκεκριμένη χρονική φάση.
 
             # Αν ο συνολικός χρόνος ολοκλήρωσης της φάσης είναι <= του α * (αριθμό των πυρήνων) και βρέθηκαν eligible servers,
-            # τότε γίνεται ο προγραμματισμός της εργασίας. 
-            if w <= self.alpha * self.scheduler.cores and eligibleServers:
+            # τότε γίνεται ο προγραμματισμός της εργασίας στο κατάλληλο 'ράφι'. 
+            if w <= self.alpha * self.scheduler.cores and eligibleCores:
                 self.packShelf(job)
                 return
             
@@ -158,8 +137,8 @@ class Shelf:
     def shelfFit(self, width):
         return self.remainingWidth >= width
 
-    # Προσθέτουμε την εργασία στο ράφι και ενημερώνουμε τον απομείνωντα χώρο.
+    # Προσθέτουμε την εργασία στο ράφι.
     def add_job(self, job):
         self.jobs.append(job)
         self.remainingWidth -= job.req
-        self.req += job.req
+        self.req += job.req # Αριθμός πυρήνων που θα χρησιμοποιειθούν για τον προγραμματισμό του ραφιού.
