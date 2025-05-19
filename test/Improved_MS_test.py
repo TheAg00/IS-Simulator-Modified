@@ -63,14 +63,13 @@ class Improved_MS_test:
             for shelf in self.shelves:
                 if math.isclose(shelf.height, upperBound) and shelf.shelfFit(s):
                     shelf.add_job(job, s)
-                    self.height += p
                     return
                     
             # Αν δεν μπορεί να τοποθετηθεί σε ήδη υπάρχον ράφι, δημιουργούμε ένα καινούριο πάνω απ' το τρέχον.
             new_shelf = Shelf(upperBound, 5)
             new_shelf.add_job(job, s)
             self.shelves.append(new_shelf)
-            self.height += p
+            self.height += upperBound
 
 
     def pack(self, job):

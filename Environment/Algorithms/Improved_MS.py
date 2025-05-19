@@ -44,7 +44,9 @@ class Improved_MS:
     # Αν ο χρόνος ολοκλήρωσης είναι <= α, τότε προσθέτουμε ένα σετ (server, s) στη λίστα με τα servers που πληρούν τις προϋποθέσεις.
     def f(self, moldedJobDict, job):
         eligibleServers = list()
-        
+
+        # Άμα δεν υπάρχουν servers, βρίσκουμε τον αριθμό πυρήνων s όπου ελαχιστοποιούν το s * p(p = χρόνος εκτέλεσης εργασίας)
+        # και ανοίγουμε νέο server όπου θα βάλουμε αυτήν την εργασία.
         if not self.scheduler.servers:
             for s in range(1, self.scheduler.cores + 1):
                 if  moldedJobDict[s] <= self.alpha:
@@ -88,6 +90,7 @@ class Improved_MS:
             shelf = Shelf(p, self.scheduler.cores)
             shelf.add_job(job)
             self.shelves.append(shelf)
+            self.height += p
             return
 
 
@@ -113,6 +116,7 @@ class Improved_MS:
         new_shelf = Shelf(upperBound, self.scheduler.cores)
         new_shelf.add_job(job)
         self.shelves.append(new_shelf)
+        self.height += upperBound
 
 
     def pack(self, job, servers = None, openNew = True):
@@ -122,9 +126,6 @@ class Improved_MS:
         
         # Ο ελάχιστος χρόνος ολοκλήρωσης της 1ης εργασίας.
         if self.alpha is None: self.alpha = min(moldedJobDict.values())
-
-        # Άμα δεν υπάρχουν servers, βρίσκουμε τον αριθμό πυρήνων s όπου ελαχιστοποιούν το s * p(p = χρόνος εκτέλεσης εργασίας)
-        # και δημιουργούμε νέο server όπου θα βάλουμε αυτήν την εργασία.    
         
         w = 0
         while True:
@@ -159,6 +160,10 @@ class Shelf:
         self.remainingWidth = maxWidth
         self.jobs = []
 
+        self.ar
+        self.fin
+        self.req = 0
+
     # Ελέγχει αν μια εργασία χωράει στο ράφι.
     def shelfFit(self, width):
         return self.remainingWidth >= width
@@ -167,3 +172,5 @@ class Shelf:
     def add_job(self, job):
         self.jobs.append(job)
         self.remainingWidth -= job.req
+        self.req += job.req
+

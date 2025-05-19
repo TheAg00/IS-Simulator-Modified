@@ -108,6 +108,10 @@ class Scheduler:
             self.update_all(j.ar, close_empty=True)
             self.algorithm.pack(j)
 
+        if self.alg == 'Improved_MS_Varaince_LOW' or self.alg == 'Improved_MS_Varaince_HIGH':
+            print(self.algorithm.shelves[0].height)
+            exit()
+
         for m in self.servers:
             self.total_bt += m.measure_remaining_busy_time()
         
