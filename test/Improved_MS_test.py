@@ -78,7 +78,6 @@ class Improved_MS_test:
             if eligibleServers:
                 p, s = self.minCost(job, eligibleServers)
                 self.w += p * s
-                print("s =", s, "p =", p, "w =", self.w, "(alpha * 5) =", self.alpha * 5)
 
             if self.w <= self.alpha * 5 and eligibleServers:
                 self.packShelf(job, p, s)
@@ -122,5 +121,5 @@ for j in jobs:
     schedule.pack(j)
 
 for shelf in schedule.shelves:
-    print(shelf.height)
-print(schedule.height)
+    print("height for shelf", shelf, "->", shelf.height)
+print("total height ->", schedule.height)
