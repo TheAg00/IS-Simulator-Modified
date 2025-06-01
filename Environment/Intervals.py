@@ -91,7 +91,7 @@ class Points:
             Utilises the interval_start time to increment all overlaying points in [start_time, time) by requirements
             In a node with the same time is found this method adds no new node (intermediate point requirements are always incremented)
         '''
-
+        
         # Εμφανίζει error με κατάλληλο μήνυμα και σταματάει στις περιπτώσεις που η λίστα είναι άδεια
         # και και αν ο τελικός χρόνος είναι μικρότερος ή ίσος με τον αρχικό.
         assert self.head is not None, "Attempted to add 'end interval' to an empty list..."

@@ -114,7 +114,8 @@ class Scheduler:
         if self.alg == 'Improved_MS_Varaince_LOW' or self.alg == 'Improved_MS_Varaince_HIGH':
             from Environment.Algorithms.FirstFitShelf import FirstFitShelf
             firstFitShelf = FirstFitShelf(self)
-            for shelf in self.algorithm.shelves:
+            shelves = sorted(self.algorithm.shelves, key = lambda x: x.ar)
+            for shelf in shelves:
                 firstFitShelf.pack(shelf)
 
 

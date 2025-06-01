@@ -64,11 +64,23 @@ class Improved_MS:
 
         return minProcessingTime, minCores
 
+    def calculateLatestArrivalTime(self, shelf):
+        maxArrivalTime = -1
+        for job in shelf.jobs:
+            jobArrivalTime = shelf.jobs[job]["info"].ar
+            maxArrivalTime = max(maxArrivalTime, jobArrivalTime)
+
+        shelf.ar = maxArrivalTime
+        shelf.fin = math.ceil(maxArrivalTime + shelf.height)
+
     # Αν το ράφι έχει γαμήσει, τότε το προγραμματίζουμε στον 1ο διαθέσημο server.
     def packShelf(self, shelf):
-        if shelf.remainingWidth == 0:
-           self.firstFitShelf.pack(shelf)
-           self.shelves.remove(shelf) # Αφαιρούμε το ράφι από τη λίστα με τα ράφια που δεν έχουν προγραμματιστεί.
+        self.calculateLatestArrivalTime(shelf)
+
+        if shelf.remainingWidth != 0: return
+
+        self.firstFitShelf.pack(shelf)
+        self.shelves.remove(shelf) # Αφαιρούμε το ράφι από τη λίστα με τα ράφια που δεν έχουν προγραμματιστεί.
 
     # Τοποθετούμε την τρέχουσα εργασία στο κατάλληλο 'ράφι'.
     def createShelf(self, job, originalJobAr):
@@ -79,9 +91,10 @@ class Improved_MS:
         if s > self.scheduler.cores // 2:
             shelf = Shelf(self.scheduler, p, self.scheduler.cores)
             shelf.add_job(job, originalJobAr, self.height)
+            self.height += p # Αυξάνουμε το συνολικό ύψος όλων των ραφιών.
+
             self.shelves.append(shelf)
             self.packShelf(shelf)
-            self.height += p # Αυξάνουμε το συνολικό ύψος όλων των ραφιών.
 
             return
 
@@ -107,8 +120,9 @@ class Improved_MS:
         # Αν δεν μπορεί να τοποθετηθεί σε ήδη υπάρχον ράφι, δημιουργούμε ένα καινούριο πάνω απ' το τρέχον.
         new_shelf = Shelf(self.scheduler, upperBound, self.scheduler.cores)
         new_shelf.add_job(job, originalJobAr, self.height)
-        self.shelves.append(new_shelf)
         self.height += upperBound
+        self.calculateLatestArrivalTime(new_shelf)
+        self.shelves.append(new_shelf) 
 
 
     def pack(self, job, servers = None, openNew = True):
@@ -146,7 +160,7 @@ class Shelf:
 
         self.totalJobs = 0
         self.ar = 0
-        self.fin = math.ceil(height)
+        self.fin = 0
         self.req = 0
 
 
