@@ -109,20 +109,18 @@ class Scheduler:
             self.update_all(j.ar, close_empty=True)
             self.algorithm.pack(j)
 
-        # Ο Improved_MS αλγόριθμος δεν κάνει προγραμματισμό των εργασιών, αλλά τις κάνει moldable και τις βάζει σε ράφια.
-        # Οπότε καλούμε τον First Fit για να κάνει τον προγραμματισμό των ραφιών που υπάρχουν οι εργασίες. 
+        # Ο Improved_MS αλγόριθμος δεν κάνει προγραμματισμό όλων των εργασιών, αλλά τις κάνει moldable και τις βάζει σε ράφια.
+        # Τα ράφια που προγραμματίζονται είναι αυτά όπου έχουν εξαντλήσει όλους τους διαθέσημους πυρήνες.
+        # Για τα υπόλοιπα, καλούμε έναν First Fit αλγόριθμο. 
         if self.alg == 'Improved_MS_Varaince_LOW' or self.alg == 'Improved_MS_Varaince_HIGH':
             from Environment.Algorithms.FirstFitShelf import FirstFitShelf
             firstFitShelf = FirstFitShelf(self)
-            shelves = sorted(self.algorithm.shelves, key = lambda x: x.ar)
+            shelves = self.algorithm.shelves
             for shelf in shelves:
                 firstFitShelf.pack(shelf)
-
-
-                # Υπολογίζουμε το συνολικό delay.
-                # for job in shelf.jobs:
-                #     delay = shelf.jobs[job]["delay"]
-                #     self.totalDelay += delay
+                
+                # Υπολογίζουμε το συνολικό delay όλων των ραφιών(ως delay θεωρείται η διαφορά μεταξύ της εργασίας με το μικρότερο arrival time με αυτήν με το μεγαλύτερο).
+                self.totalDelay += shelf.delay
 
         for m in self.servers:
             self.total_bt += m.measure_remaining_busy_time()

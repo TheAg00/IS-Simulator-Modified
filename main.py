@@ -14,7 +14,7 @@ def main(config):
     return busy_time, sch.totalDelay
 
 if __name__ == "__main__":
-    cores, cluster, shelfLimit = 32, False, 3
+    cores, cluster, shelfLimit = 32, False, 1
     print(f'RUNNING FOR {cores} CORES! CLUSTER IS SET TO {cluster}. SHELF LIMIT IS SET TO {shelfLimit}')
 
     for wl in range(0, 16):
@@ -30,7 +30,7 @@ if __name__ == "__main__":
             }
             result, totalDelay = main(config)
             print(f'{alg}:{result:<10}', end=' ', flush=True)
-            # print(f'total delay: {totalDelay:<10}', end = ' ')
+            print(f'total delay: {totalDelay:<10}', end = ' ')
         print()
 
             

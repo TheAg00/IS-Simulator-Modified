@@ -64,6 +64,7 @@ class Improved_MS:
 
         return minProcessingTime, minCores
 
+    # Υπολογίζουμε το αργείτερο arrival time των εργασιών, όπου θα είναι και το arrival time του shelf.
     def calculateLatestArrivalTime(self, shelf):
         maxArrivalTime = -1
         for job in shelf.jobs:
@@ -73,9 +74,19 @@ class Improved_MS:
         shelf.ar = maxArrivalTime
         shelf.fin = math.ceil(maxArrivalTime + shelf.height)
 
+    # Βρίκσουμε το ελάχιστο arrival time και βρίσκουμε το delay που υπάρχει σε αυτό και το αργείτερο arrival time.
+    def calculateDelayTime(self, shelf):
+        minArrivalTime = shelf.jobs["job1"]["info"].ar
+        for job in shelf.jobs:
+            jobArrivalTime = shelf.jobs[job]["info"].ar
+            minArrivalTime = min(minArrivalTime, jobArrivalTime)
+        
+        shelf.delay = shelf.ar - minArrivalTime
+
     # Αν το ράφι έχει γαμήσει, τότε το προγραμματίζουμε στον 1ο διαθέσημο server.
     def packShelf(self, shelf):
         self.calculateLatestArrivalTime(shelf)
+        self.calculateDelayTime(shelf)
 
         if shelf.remainingWidth != 0: return
 
@@ -162,6 +173,7 @@ class Shelf:
         self.ar = 0
         self.fin = 0
         self.req = 0
+        self.delay = 0
 
 
 
