@@ -61,16 +61,17 @@ class Improved_MS:
         return minProcessingTime, minCores
 
     # Τοποθετούμε την τρέχουσα εργασία στο κατάλληλο 'ράφι'.
-    def packShelf(self, job):
+    def packShelf(self, job, originalJobAr):
         s = job.req
         p = job.dur
 
         # Για μεγάλες εργασίες, δημιουργούμε ένα νέο ράφι πάνω απ' το τρέχον, με ύψος ίσο με το χρόνο ολοκλήρωσης της εργασίας.
         if s > self.scheduler.cores // 2:
             shelf = Shelf(p, self.scheduler.cores)
-            shelf.add_job(job)
+            shelf.add_job(job, originalJobAr, self.height)
             self.shelves.append(shelf)
             self.height += p # Αυξάνουμε το συνολικό ύψος όλων των ραφιών.
+
             return
 
 
@@ -88,12 +89,12 @@ class Improved_MS:
         # Η εργασία θα τοποθετηθεί στο 1ο διαθέσιμο ράφι ύψους r ^ (k + 1).
         for shelf in self.shelves:
             if math.isclose(shelf.height, upperBound) and shelf.shelfFit(s):
-                shelf.add_job(job)
+                shelf.add_job(job, originalJobAr, lowerBound)
                 return
                 
         # Αν δεν μπορεί να τοποθετηθεί σε ήδη υπάρχον ράφι, δημιουργούμε ένα καινούριο πάνω απ' το τρέχον.
         new_shelf = Shelf(upperBound, self.scheduler.cores)
-        new_shelf.add_job(job)
+        new_shelf.add_job(job, originalJobAr, self.height)
         self.shelves.append(new_shelf)
         self.height += upperBound
 
@@ -107,6 +108,7 @@ class Improved_MS:
         if self.alpha is None: self.alpha = min(moldedJobDict.values())
         
         w = 0
+        originalJobAr = job.ar
         while True:
             eligibleCores = self.f(moldedJobDict, job) # Όλοι οι πυρήνες s, όπου p(s, j) <= self.alpha
 
@@ -117,7 +119,7 @@ class Improved_MS:
             # Αν ο συνολικός χρόνος ολοκλήρωσης της φάσης είναι <= του α * (αριθμό των πυρήνων) και βρέθηκαν eligible servers,
             # τότε γίνεται ο προγραμματισμός της εργασίας στο κατάλληλο 'ράφι'. 
             if w <= self.alpha * self.scheduler.cores and eligibleCores:
-                self.packShelf(job)
+                self.packShelf(job, originalJobAr)
                 return
             
             self.alpha *= self.beta
@@ -127,8 +129,9 @@ class Shelf:
     def __init__(self, height, maxWidth):
         self.height = height
         self.remainingWidth = maxWidth
-        self.jobs = []
+        self.jobs = {}
 
+        self.totalJobs = 0
         self.ar = 0
         self.fin = math.ceil(height)
         self.req = 0
@@ -138,7 +141,17 @@ class Shelf:
         return self.remainingWidth >= width
 
     # Προσθέτουμε την εργασία στο ράφι.
-    def add_job(self, job):
-        self.jobs.append(job)
+    def add_job(self, job, originalJobAr, newJobAr):
+        jobInfo = {}
+        self.totalJobs += 1
+        delay = newJobAr - originalJobAr
+        
+        # Κρατάμε τις πληροφορίες για κάθε εργασία που προγραμματίζεται και το delay σε σχέση με τον παλιό χρόνο έναρξης.
+        jobInfo.update({"info" : job})
+        jobInfo.update({"delay" : delay})
+        jobName = "job" + str(self.totalJobs)
+        self.jobs.update({jobName : jobInfo})
+
         self.remainingWidth -= job.req
         self.req += job.req # Αριθμός πυρήνων που θα χρησιμοποιειθούν για τον προγραμματισμό του ραφιού.
+

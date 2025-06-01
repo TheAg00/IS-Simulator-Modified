@@ -6,12 +6,13 @@ class edge_server():
         A wrapper around Points utilising the interval logic defined
         there to model a processor processing a workload 
     '''
-    def __init__(self, capacity, id=-1):
+    def __init__(self, capacity, id=-1, shelfLimit  = -1):
         self.capacity = capacity
         self.index = id
         self.points = Points()
         self.jobs = []
-
+        
+        self.shelfLimit = shelfLimit
         self.category = None
 
     def update(self, time):

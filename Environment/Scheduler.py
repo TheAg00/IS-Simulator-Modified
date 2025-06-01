@@ -6,14 +6,16 @@ from Environment.Algorithms.FirstFit import FirstFit
 from copy import deepcopy
 
 class Scheduler:
-    def __init__(self, wl, cores, alg):
+    def __init__(self, wl, cores, alg, shelfLimit):
         self.cores = cores
         self.alg = alg
         self.wl = wl
+        self.shelfLimit = shelfLimit
 
         self.servers = []
         self.total_bt = 0
         self.total_servers = 0
+        self.totalDelay = 0
 
         self.algorithm = None
         self.set_algorithm(alg, workload=self.wl)
@@ -85,7 +87,7 @@ class Scheduler:
         return copy
 
     def add_server(self, job, category=None):
-        server = edge_server(self.cores, len(self.servers)+1)
+        server = edge_server(self.cores, len(self.servers) + 1, self.shelfLimit)
         server.category = category
         server.add_job(job)
         self.servers.append(server)
@@ -112,9 +114,16 @@ class Scheduler:
         # Ο Improved_MS αλγόριθμος δεν κάνει προγραμματισμό των εργασιών, αλλά τις κάνει moldable και τις βάζει σε ράφια.
         # Οπότε καλούμε τον First Fit για να κάνει τον προγραμματισμό των ραφιών που υπάρχουν οι εργασίες. 
         if self.alg == 'Improved_MS_Varaince_LOW' or self.alg == 'Improved_MS_Varaince_HIGH':
-            firstFit = FirstFit(self)
+            from Environment.Algorithms.FirstFitShelf import FirstFitShelf
+            firstFitShelf = FirstFitShelf(self)
             for shelf in self.algorithm.shelves:
-                firstFit.pack(shelf)
+                firstFitShelf.pack(shelf)
+
+
+                # Υπολογίζουμε το συνολικό delay.
+                # for job in shelf.jobs:
+                #     delay = shelf.jobs[job]["delay"]
+                #     self.totalDelay += delay
 
         for m in self.servers:
             self.total_bt += m.measure_remaining_busy_time()
