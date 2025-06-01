@@ -30,7 +30,7 @@ if __name__ == "__main__":
             }
             result, totalDelay = main(config)
             print(f'{alg}:{result:<10}', end=' ', flush=True)
-            # print(f'total delay: {totalDelay}', end = ' ')
+            # print(f'total delay: {totalDelay:<10}', end = ' ')
         print()
 
             
