@@ -1,4 +1,6 @@
 from Environment.Moldable_task_model import *
+from Environment.Algorithms.FirstFitShelf import FirstFitShelf
+
 
 import random
 import math
@@ -13,6 +15,8 @@ class Improved_MS:
         self.beta = 1.56
         self.r = 1.44
         self.height = 0
+
+        self.firstFitShelf = FirstFitShelf(scheduler)
 
     # Μετατρέπουμε την εργασία σε moldable.
     def convertMold(self, job):
@@ -60,16 +64,23 @@ class Improved_MS:
 
         return minProcessingTime, minCores
 
+    # Αν το ράφι έχει γαμήσει, τότε το προγραμματίζουμε στον 1ο διαθέσημο server.
+    def packShelf(self, shelf):
+        if shelf.remainingWidth == 0:
+           self.firstFitShelf.pack(shelf)
+           self.shelves.remove(shelf) # Αφαιρούμε το ράφι από τη λίστα με τα ράφια που δεν έχουν προγραμματιστεί.
+
     # Τοποθετούμε την τρέχουσα εργασία στο κατάλληλο 'ράφι'.
-    def packShelf(self, job, originalJobAr):
+    def createShelf(self, job, originalJobAr):
         s = job.req
         p = job.dur
 
         # Για μεγάλες εργασίες, δημιουργούμε ένα νέο ράφι πάνω απ' το τρέχον, με ύψος ίσο με το χρόνο ολοκλήρωσης της εργασίας.
         if s > self.scheduler.cores // 2:
-            shelf = Shelf(p, self.scheduler.cores)
+            shelf = Shelf(self.scheduler, p, self.scheduler.cores)
             shelf.add_job(job, originalJobAr, self.height)
             self.shelves.append(shelf)
+            self.packShelf(shelf)
             self.height += p # Αυξάνουμε το συνολικό ύψος όλων των ραφιών.
 
             return
@@ -90,10 +101,11 @@ class Improved_MS:
         for shelf in self.shelves:
             if math.isclose(shelf.height, upperBound) and shelf.shelfFit(s):
                 shelf.add_job(job, originalJobAr, lowerBound)
+                self.packShelf(shelf)
                 return
                 
         # Αν δεν μπορεί να τοποθετηθεί σε ήδη υπάρχον ράφι, δημιουργούμε ένα καινούριο πάνω απ' το τρέχον.
-        new_shelf = Shelf(upperBound, self.scheduler.cores)
+        new_shelf = Shelf(self.scheduler, upperBound, self.scheduler.cores)
         new_shelf.add_job(job, originalJobAr, self.height)
         self.shelves.append(new_shelf)
         self.height += upperBound
@@ -119,14 +131,15 @@ class Improved_MS:
             # Αν ο συνολικός χρόνος ολοκλήρωσης της φάσης είναι <= του α * (αριθμό των πυρήνων) και βρέθηκαν eligible servers,
             # τότε γίνεται ο προγραμματισμός της εργασίας στο κατάλληλο 'ράφι'. 
             if w <= self.alpha * self.scheduler.cores and eligibleCores:
-                self.packShelf(job, originalJobAr)
+                self.createShelf(job, originalJobAr)
                 return
             
             self.alpha *= self.beta
             w = 0
 
 class Shelf:
-    def __init__(self, height, maxWidth):
+    def __init__(self, scheduler, height, maxWidth):
+        self.scheduler = scheduler
         self.height = height
         self.remainingWidth = maxWidth
         self.jobs = {}
@@ -135,6 +148,8 @@ class Shelf:
         self.ar = 0
         self.fin = math.ceil(height)
         self.req = 0
+
+
 
     # Ελέγχει αν μια εργασία χωράει στο ράφι.
     def shelfFit(self, width):
