@@ -59,4 +59,5 @@ def parse(path, cores=32, cluster=False):
     # sorting by arrival
     jobs = sorted(jobs, key=lambda x: x.ar)
 
+
     return jobs

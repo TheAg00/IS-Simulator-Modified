@@ -11,6 +11,8 @@ class edge_server():
         self.index = id
         self.points = Points()
         self.jobs = []
+        self.shelves = []
+        self.height = 0
         
         self.shelfLimit = shelfLimit
         self.category = None
@@ -22,9 +24,29 @@ class edge_server():
             remain in the list although their intervals are shrieked to start at 'time'
         '''
         busy_time = self.points.move_to_time(time)
+       
 
         while self.jobs:
+
             if self.jobs[0][0] < time:
+                heapq.heappop(self.jobs)
+            else:
+                break
+         
+        return busy_time
+    
+    def update_shalves(self, time):
+        '''
+            Simulates the progression of time for the processor.
+            Removes completed jobs and their associated intervals. Partially completed jobs 
+            remain in the list although their intervals are shrieked to start at 'time'
+        '''
+        busy_time = 0
+        for shelf in self.shelves: busy_time += shelf.height
+
+        for shelf in self.shelves:
+            
+            if shelf[0] < time:
                 heapq.heappop(self.jobs)
             else:
                 break

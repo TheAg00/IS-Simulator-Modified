@@ -64,34 +64,35 @@ class Improved_MS:
 
         return minProcessingTime, minCores
 
-    # Υπολογίζουμε το αργείτερο arrival time των εργασιών, όπου θα είναι και το arrival time του shelf.
-    def calculateLatestArrivalTime(self, shelf):
-        maxArrivalTime = -1
-        for job in shelf.jobs:
-            jobArrivalTime = shelf.jobs[job]["info"].ar
-            maxArrivalTime = max(maxArrivalTime, jobArrivalTime)
+    # # Υπολογίζουμε το αργείτερο arrival time των εργασιών, όπου θα είναι και το arrival time του shelf.
+    # def calculateLatestArrivalTime(self, shelf):
+    #     maxArrivalTime = -1
+    #     for job in shelf.jobs:
+    #         jobArrivalTime = shelf.jobs[job]["info"].ar
+    #         maxArrivalTime = max(maxArrivalTime, jobArrivalTime)
 
-        shelf.ar = maxArrivalTime
-        shelf.fin = math.ceil(maxArrivalTime + shelf.height)
+    #     shelf.ar = maxArrivalTime
+    #     shelf.fin = math.ceil(maxArrivalTime + shelf.height)
 
-    # Βρίκσουμε το ελάχιστο arrival time και βρίσκουμε το delay που υπάρχει σε αυτό και το αργείτερο arrival time.
-    def calculateDelayTime(self, shelf):
-        minArrivalTime = shelf.jobs["job1"]["info"].ar
-        for job in shelf.jobs:
-            jobArrivalTime = shelf.jobs[job]["info"].ar
-            minArrivalTime = min(minArrivalTime, jobArrivalTime)
+    # # Βρίκσουμε το ελάχιστο arrival time και βρίσκουμε το delay που υπάρχει σε αυτό και το αργείτερο arrival time.
+    # def calculateDelayTime(self, shelf):
+    #     minArrivalTime = shelf.jobs["job1"]["info"].ar
+    #     for job in shelf.jobs:
+    #         jobArrivalTime = shelf.jobs[job]["info"].ar
+    #         minArrivalTime = min(minArrivalTime, jobArrivalTime)
         
-        shelf.delay = shelf.ar - minArrivalTime
+    #     shelf.delay = shelf.ar - minArrivalTime
 
     # Αν το ράφι έχει γαμήσει, τότε το προγραμματίζουμε στον 1ο διαθέσημο server.
     def packShelf(self, shelf):
-        self.calculateLatestArrivalTime(shelf)
-        self.calculateDelayTime(shelf)
+        # self.calculateLatestArrivalTime(shelf)
+        # self.calculateDelayTime(shelf)
 
-        if shelf.remainingWidth != 0: return
+        # if shelf.remainingWidth != 0: return
 
         self.firstFitShelf.pack(shelf)
-        self.shelves.remove(shelf) # Αφαιρούμε το ράφι από τη λίστα με τα ράφια που δεν έχουν προγραμματιστεί.
+        # self.shelves.remove(shelf) # Αφαιρούμε το ράφι από τη λίστα με τα ράφια που δεν έχουν προγραμματιστεί.
+
 
     # Τοποθετούμε την τρέχουσα εργασία στο κατάλληλο 'ράφι'.
     def createShelf(self, job, originalJobAr):
@@ -101,7 +102,7 @@ class Improved_MS:
         # Για μεγάλες εργασίες, δημιουργούμε ένα νέο ράφι πάνω απ' το τρέχον, με ύψος ίσο με το χρόνο ολοκλήρωσης της εργασίας.
         if s > self.scheduler.cores // 2:
             shelf = Shelf(self.scheduler, p, self.scheduler.cores)
-            shelf.add_job(job, originalJobAr, self.height)
+            shelf.add_job(job, self.height)
             self.height += p # Αυξάνουμε το συνολικό ύψος όλων των ραφιών.
 
             self.shelves.append(shelf)
@@ -167,13 +168,11 @@ class Shelf:
         self.scheduler = scheduler
         self.height = height
         self.remainingWidth = maxWidth
-        self.jobs = {}
+        self.jobs = []
 
-        self.totalJobs = 0
         self.ar = 0
-        self.fin = 0
+        # self.fin = 0
         self.req = 0
-        self.delay = 0
 
 
 
@@ -182,17 +181,8 @@ class Shelf:
         return self.remainingWidth >= width
 
     # Προσθέτουμε την εργασία στο ράφι.
-    def add_job(self, job, originalJobAr, newJobAr):
-        jobInfo = {}
-        self.totalJobs += 1
-        delay = newJobAr - originalJobAr
-        
-        # Κρατάμε τις πληροφορίες για κάθε εργασία που προγραμματίζεται και το delay σε σχέση με τον παλιό χρόνο έναρξης.
-        jobInfo.update({"info" : job})
-        jobInfo.update({"delay" : delay})
-        jobName = "job" + str(self.totalJobs)
-        self.jobs.update({jobName : jobInfo})
-
+    def add_job(self, job):
+        self.jobs.append(job)
         self.remainingWidth -= job.req
         self.req += job.req # Αριθμός πυρήνων που θα χρησιμοποιειθούν για τον προγραμματισμό του ραφιού.
 

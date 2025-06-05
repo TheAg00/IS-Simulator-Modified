@@ -94,5 +94,6 @@ def parse_workload(set, cluster, cores):
     '''
     data = glob.glob("data/*")
     # Βάζει 5 και 7, γιατί το όνομα θα μοιάζει με κάτι σαν "data/00_NASA..."
-    data = sorted(data, key=lambda x: int(x[5:7])) 
+    data = sorted(data, key=lambda x: int(x[5:7]))
+    
     return parse(data[set], cores=cores, cluster=cluster)
