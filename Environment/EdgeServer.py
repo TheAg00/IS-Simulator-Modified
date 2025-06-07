@@ -12,10 +12,11 @@ class edge_server():
         self.points = Points()
         self.jobs = []
         self.shelves = []
-        self.height = 0
         
         self.shelfLimit = shelfLimit
         self.category = None
+
+   
 
     def update(self, time):
         '''
@@ -27,28 +28,28 @@ class edge_server():
        
 
         while self.jobs:
-
             if self.jobs[0][0] < time:
                 heapq.heappop(self.jobs)
             else:
-                break
-         
+                break  
+            
         return busy_time
     
     def update_shalves(self, time):
         '''
             Simulates the progression of time for the processor.
-            Removes completed jobs and their associated intervals. Partially completed jobs 
+            Removes completed shelves and their associated intervals. Partially completed shelves 
             remain in the list although their intervals are shrieked to start at 'time'
         '''
-        busy_time = 0
-        for shelf in self.shelves: busy_time += shelf.height
+        busy_time = self.points.move_to_time(time)
 
-        for shelf in self.shelves:         
-            if shelf[0] < time:
-                heapq.heappop(shelf)
-            else:
-                break
+
+        while self.shelves:
+            if self.shelves[0][0] >= time: break
+            
+            heapq.heappop(self.shelves)
+            
+
          
         return busy_time
     
@@ -68,10 +69,18 @@ class edge_server():
         else:
             return self.points.check_fit(job.ar, job.fin, job.req, self.capacity)
 
-    def add_job(self, job):
+    def add_shelf(self, shelf):
         '''
-            Implements the logic for adding a job to the set of points
+            Implements the logic for adding a shelf to the set of points
         '''
-        heapq.heappush(self.jobs, (job.fin, job))
-        self.points.insert_interval(job.ar, job.fin, job.req)
+        heapq.heappush(self.shelves, (shelf.fin, shelf))
+        self.points.insert_interval(shelf.ar, shelf.fin, shelf.req)
+
+    # def add_job(self, job):
+    #     '''
+    #         Implements the logic for adding a job to the set of points
+    #     '''
+    #     heapq.heappush(self.jobs, (job.fin, job))
+        
+    #     self.points.insert_interval(job.ar, job.fin, job.req)
         

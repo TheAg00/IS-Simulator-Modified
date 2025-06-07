@@ -155,6 +155,7 @@ class Points:
             current_node = current_node.next
         
         # if execution gets here we have moved past all points - list is now empty
+        # Αν ο επόμενος κόμβος απ' αυτόν που βρισκόμαστε είναι κενός, σημαίνει πως προσπελάσαμε όλους τους κόμβους.
         self.head = None
         return busy_time
     

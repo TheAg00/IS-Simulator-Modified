@@ -3,7 +3,7 @@ class FirstFitShelf:
         self.scheduler = scheduler
     
     def new_server(self, shelf):
-        self.scheduler.add_server(shelf)
+        self.scheduler.add_server_shelves(shelf)
 
     def pack(self, shelf, servers = None):
         if servers is None: servers = self.scheduler.servers
@@ -16,11 +16,11 @@ class FirstFitShelf:
         # Ψάχνουμε τον 1ο διαθέσημο server που μπορεί να προγραμματιστεί το ράφι.
         for server in servers:
             # Επιτρέπουμε προσθήκη ραφιού σε ένα server μόνο αν τηρεί τον περιορισμό που έχουμε δώσει(αν shelfLimit == -1, τότε δεν υπάρχει περιορισμός.) 
-            if len(server.jobs) >= server.shelfLimit and server.shelfLimit != -1: break
+            if len(server.shelves) >= server.shelfLimit and server.shelfLimit != -1: break
 
-            # Ελέγχουμε αν η εργασία χωράει στο server και αν ο αριθμός των ραφιών δεν ξεπερνά το όριο που μπορεί να έχει ο server.
+            # Ελέγχουμε αν η εργασία χωράει στο server.
             if server.check_fit(shelf):
-                server.add_job(shelf)
+                server.add_shelf(shelf)
                 return 
    
         self.new_server(shelf)
