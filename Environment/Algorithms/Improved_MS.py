@@ -64,45 +64,21 @@ class Improved_MS:
 
         return minProcessingTime, minCores
 
-    # # Υπολογίζουμε το αργείτερο arrival time των εργασιών, όπου θα είναι και το arrival time του shelf.
-    # def calculateLatestArrivalTime(self, shelf):
-    #     maxArrivalTime = -1
-    #     for job in shelf.jobs:
-    #         jobArrivalTime = shelf.jobs[job]["info"].ar
-    #         maxArrivalTime = max(maxArrivalTime, jobArrivalTime)
-
-    #     shelf.ar = maxArrivalTime
-    #     shelf.fin = math.ceil(maxArrivalTime + shelf.height)
-
-    # # Βρίκσουμε το ελάχιστο arrival time και βρίσκουμε το delay που υπάρχει σε αυτό και το αργείτερο arrival time.
-    # def calculateDelayTime(self, shelf):
-    #     minArrivalTime = shelf.jobs["job1"]["info"].ar
-    #     for job in shelf.jobs:
-    #         jobArrivalTime = shelf.jobs[job]["info"].ar
-    #         minArrivalTime = min(minArrivalTime, jobArrivalTime)
-        
-    #     shelf.delay = shelf.ar - minArrivalTime
-
     # Αν το ράφι έχει γαμήσει, τότε το προγραμματίζουμε στον 1ο διαθέσημο server.
     def packShelf(self, shelf):
-        # self.calculateLatestArrivalTime(shelf)
-        # self.calculateDelayTime(shelf)
-
-        # if shelf.remainingWidth != 0: return
-
         self.firstFitShelf.pack(shelf)
-        # self.shelves.remove(shelf) # Αφαιρούμε το ράφι από τη λίστα με τα ράφια που δεν έχουν προγραμματιστεί.
+        self.shelves.remove(shelf) # Αφαιρούμε το ράφι από τη λίστα με τα ράφια που δεν έχουν προγραμματιστεί.
 
 
     # Τοποθετούμε την τρέχουσα εργασία στο κατάλληλο 'ράφι'.
-    def createShelf(self, job, originalJobAr):
+    def createShelf(self, job):
         s = job.req
         p = job.dur
 
         # Για μεγάλες εργασίες, δημιουργούμε ένα νέο ράφι πάνω απ' το τρέχον, με ύψος ίσο με το χρόνο ολοκλήρωσης της εργασίας.
         if s > self.scheduler.cores // 2:
             shelf = Shelf(self.scheduler, p, self.scheduler.cores)
-            shelf.add_job(job, self.height)
+            shelf.add_job(job)
             self.height += p # Αυξάνουμε το συνολικό ύψος όλων των ραφιών.
 
             self.shelves.append(shelf)
@@ -125,15 +101,15 @@ class Improved_MS:
         # Η εργασία θα τοποθετηθεί στο 1ο διαθέσιμο ράφι ύψους r ^ (k + 1).
         for shelf in self.shelves:
             if math.isclose(shelf.height, upperBound) and shelf.shelfFit(s):
-                shelf.add_job(job, originalJobAr, lowerBound)
+                shelf.add_job(job)
                 self.packShelf(shelf)
                 return
                 
         # Αν δεν μπορεί να τοποθετηθεί σε ήδη υπάρχον ράφι, δημιουργούμε ένα καινούριο πάνω απ' το τρέχον.
         new_shelf = Shelf(self.scheduler, upperBound, self.scheduler.cores)
-        new_shelf.add_job(job, originalJobAr, self.height)
+        new_shelf.add_job(job)
         self.height += upperBound
-        self.calculateLatestArrivalTime(new_shelf)
+        # self.calculateLatestArrivalTime(new_shelf)
         self.shelves.append(new_shelf) 
 
 
@@ -146,7 +122,6 @@ class Improved_MS:
         if self.alpha is None: self.alpha = min(moldedJobDict.values())
         
         w = 0
-        originalJobAr = job.ar
         while True:
             eligibleCores = self.f(moldedJobDict, job) # Όλοι οι πυρήνες s, όπου p(s, j) <= self.alpha
 
@@ -157,7 +132,7 @@ class Improved_MS:
             # Αν ο συνολικός χρόνος ολοκλήρωσης της φάσης είναι <= του α * (αριθμό των πυρήνων) και βρέθηκαν eligible servers,
             # τότε γίνεται ο προγραμματισμός της εργασίας στο κατάλληλο 'ράφι'. 
             if w <= self.alpha * self.scheduler.cores and eligibleCores:
-                self.createShelf(job, originalJobAr)
+                self.createShelf(job)
                 return
             
             self.alpha *= self.beta
@@ -171,7 +146,7 @@ class Shelf:
         self.jobs = []
 
         self.ar = 0
-        # self.fin = 0
+        self.fin = math.ceil(height)
         self.req = 0
 
 

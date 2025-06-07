@@ -44,10 +44,9 @@ class edge_server():
         busy_time = 0
         for shelf in self.shelves: busy_time += shelf.height
 
-        for shelf in self.shelves:
-            
+        for shelf in self.shelves:         
             if shelf[0] < time:
-                heapq.heappop(self.jobs)
+                heapq.heappop(shelf)
             else:
                 break
          

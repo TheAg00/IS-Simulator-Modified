@@ -138,7 +138,6 @@ class Points:
         
         busy_time = 0
         current_node = self.head
-        
         while current_node.next is not None:
             if current_node.time == time:
                 self.head = current_node

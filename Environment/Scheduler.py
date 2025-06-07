@@ -120,7 +120,7 @@ class Scheduler:
                 firstFitShelf.pack(shelf)
                 
                 # Υπολογίζουμε το συνολικό delay όλων των ραφιών(ως delay θεωρείται η διαφορά μεταξύ της εργασίας με το μικρότερο arrival time με αυτήν με το μεγαλύτερο).
-                self.totalDelay += shelf.delay
+                # self.totalDelay += shelf.delay
 
         for m in self.servers:
             self.total_bt += m.measure_remaining_busy_time()
