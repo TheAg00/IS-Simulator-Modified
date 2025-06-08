@@ -12,11 +12,15 @@ class edge_server():
         self.points = Points()
         self.jobs = []
         self.shelves = []
+        self.maxHeight = 0
         
         self.shelfLimit = shelfLimit
         self.category = None
 
    
+    def calculate_max_height(self, height):
+        self.maxHeight = max(self.maxHeight, height)
+        
 
     def update(self, time):
         '''
@@ -35,6 +39,28 @@ class edge_server():
             
         return busy_time
     
+    def update_shelf(self, time):
+        '''
+            Simulates the progression of time for the processor.
+            Removes completed jobs and their associated intervals. Partially completed jobs 
+            remain in the list although their intervals are shrieked to start at 'time'
+        '''
+        busy_time = self.points.move_to_time(time)
+        
+
+        while self.jobs:
+            if self.jobs[0][0] < time:
+                heapq.heappop(self.jobs)
+            else:
+                break
+
+        while self.shelves:
+            if self.shelves[0][0] < time:
+                heapq.heappop(self.jobs)
+            else:
+                break
+            
+        return busy_time
     
     def measure_remaining_busy_time(self):
         '''

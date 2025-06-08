@@ -15,11 +15,11 @@ class FirstFitShelf:
         
         # Ψάχνουμε τον 1ο διαθέσημο server που μπορεί να προγραμματιστεί το ράφι.
         for server in servers:
-            # Επιτρέπουμε προσθήκη ραφιού σε ένα server μόνο αν τηρεί τον περιορισμό που έχουμε δώσει(αν shelfLimit == -1, τότε δεν υπάρχει περιορισμός.) 
-            if len(server.shelves) >= server.shelfLimit and server.shelfLimit != -1: break
+            # Επιτρέπουμε προσθήκη ραφιού σε ένα server μόνο αν τηρεί τον περιορισμό σε ράφια που έχουμε δώσει(αν shelfLimit == -1, τότε δεν υπάρχει περιορισμός.) 
+            validServer = False if len(server.shelves) >= server.shelfLimit and server.shelfLimit != -1 else True
 
             # Ελέγχουμε αν η εργασία χωράει στο server.
-            if server.check_fit(shelf):
+            if validServer and server.check_fit(shelf):
                 server.add_shelf(shelf)
                 return 
    
