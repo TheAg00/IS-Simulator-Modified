@@ -108,34 +108,11 @@ class Scheduler:
                 remove_list.append(m)
         
         if close_empty and remove_list: self.servers = [x for x in self.servers if x not in remove_list]
-            
-    # def update_all_shelves(self, close_empty = False):
-    #     remove_list = [] # Λίστα με άδειους servers που θα αφαιρέσουμε.
-    #     for m in self.servers:
-    #         self.total_bt += m.update(time) # Μετράμε το συνολικό busy time
-    #         if close_empty and m.points.head is None:
-    #             remove_list.append(m)
-
+  
     def run(self, jobs):
         for j in jobs:
-            self.update_all(j.ar, close_empty=True)
+            self.update_all(0, close_empty=True)
             self.algorithm.pack(j)
-            # Ελέγχω αν υπάρχουν ανοιχτοί σερβερς και τότε εκτελώ το update_all για να μετρήσει το busy_time.
-            # if self.servers:
-            #     self.update_all_shelves()
-
-        # Ο Improved_MS αλγόριθμος δεν κάνει προγραμματισμό όλων των εργασιών, αλλά τις κάνει moldable και τις βάζει σε ράφια.
-        # Τα ράφια που προγραμματίζονται είναι αυτά όπου έχουν εξαντλήσει όλους τους διαθέσημους πυρήνες.
-        # Για τα υπόλοιπα, καλούμε έναν First Fit αλγόριθμο. 
-        # if self.alg == 'Improved_MS_Varaince_LOW' or self.alg == 'Improved_MS_Varaince_HIGH':
-        #     from Environment.Algorithms.FirstFitShelf import FirstFitShelf
-        #     firstFitShelf = FirstFitShelf(self)
-        #     shelves = self.algorithm.shelves
-        #     for shelf in shelves:
-        #         firstFitShelf.pack(shelf)
-                
-        #         # Υπολογίζουμε το συνολικό delay όλων των ραφιών(ως delay θεωρείται η διαφορά μεταξύ της εργασίας με το μικρότερο arrival time με αυτήν με το μεγαλύτερο).
-        #         # self.totalDelay += shelf.delay
 
         for m in self.servers:
             self.total_bt += m.measure_remaining_busy_time()

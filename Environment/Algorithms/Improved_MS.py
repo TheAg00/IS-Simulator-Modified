@@ -10,11 +10,9 @@ class Improved_MS:
         self.scheduler = scheduler
         self.varianceModel = "low" if self.scheduler.alg == 'Improved_MS_Varaince_LOW' else "high"
 
-        # self.shelves = []
         self.alpha = None
         self.beta = 1.56
         self.r = 1.44
-        self.height = 0
 
         self.firstFitShelf = FirstFitShelf(scheduler)
 
@@ -75,10 +73,8 @@ class Improved_MS:
 
         # Για μεγάλες εργασίες, δημιουργούμε ένα νέο ράφι πάνω απ' το τρέχον, με ύψος ίσο με το χρόνο ολοκλήρωσης της εργασίας.
         if s > maxCores // 2:
-            shelf = Shelf(self.scheduler, p, maxCores, self.height)
+            shelf = Shelf(self.scheduler, p, maxCores)
             shelf.add_job(job)
-            self.height += math.ceil(p) # Αυξάνουμε το συνολικό ύψος όλων των ραφιών.
-
             self.packShelf(shelf)
 
             return
@@ -96,26 +92,15 @@ class Improved_MS:
 
         # Ελέγχουμε για ανοιχτά servers ώστε να τοποθετήσουμε την εργασία σε υπάρχον ράφι.
         for server in self.scheduler.servers:
-            
             for _, shelf in server.shelves:
                 if math.isclose(shelf.height, upperBound) and shelf.shelfFit(s):
                     shelf.add_job(job)
                     return
-                
-            # Η εργασία θα τοποθετηθεί στο 1ο διαθέσιμο ράφι ύψους r ^ (k + 1).
-            # for shelf in self.shelves:
-            #     if math.isclose(shelf.height, upperBound) and shelf.shelfFit(s):
-            #         shelf.add_job(job)
-            #         # self.packShelf(shelf)
-            #         return
-      
+    
         # Αν δεν μπορεί να τοποθετηθεί σε ήδη υπάρχον ράφι, δημιουργούμε ένα καινούριο πάνω απ' το τρέχον.
-        new_shelf = Shelf(self.scheduler, upperBound, maxCores, self.height)
+        new_shelf = Shelf(self.scheduler, upperBound, maxCores)
         new_shelf.add_job(job)
-        self.height += math.ceil(upperBound)
         self.packShelf(new_shelf)
-        # self.calculateLatestArrivalTime(new_shelf)
-        # self.shelves.append(new_shelf)
         
 
     def pack(self, job, servers = None, openNew = True):
@@ -128,7 +113,7 @@ class Improved_MS:
         
         w = 0
         while True:
-            eligibleCores = self.f(moldedJobDict, job) # Όλοι οι πυρήνες s, όπου p(s, j) <= self.alpha
+            eligibleCores = self.f(moldedJobDict) # Όλοι οι πυρήνες s, όπου p(s, j) <= self.alpha
 
             if eligibleCores:
                 job.dur, job.req = self.minCost(moldedJobDict, eligibleCores)
@@ -144,14 +129,14 @@ class Improved_MS:
             w = 0
 
 class Shelf:
-    def __init__(self, scheduler, height, maxWidth, arrival):
+    def __init__(self, scheduler, height, maxWidth):
         self.scheduler = scheduler
         self.height = height
         self.remainingWidth = maxWidth
         self.jobs = []
 
-        self.ar = arrival
-        self.fin = arrival + math.ceil(height)
+        self.ar = 0
+        self.fin = math.ceil(height)
         self.req = 0
 
     # Αποφεύγουμε το σφάλμα -> TypeError: '<' not supported between instances of 'Shelf' and 'Shelf'

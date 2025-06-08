@@ -35,23 +35,6 @@ class edge_server():
             
         return busy_time
     
-    def update_shalves(self, time):
-        '''
-            Simulates the progression of time for the processor.
-            Removes completed shelves and their associated intervals. Partially completed shelves 
-            remain in the list although their intervals are shrieked to start at 'time'
-        '''
-        busy_time = self.points.move_to_time(time)
-
-
-        while self.shelves:
-            if self.shelves[0][0] >= time: break
-            
-            heapq.heappop(self.shelves)
-            
-
-         
-        return busy_time
     
     def measure_remaining_busy_time(self):
         '''
