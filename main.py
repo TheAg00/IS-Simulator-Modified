@@ -14,8 +14,8 @@ def main(config):
     return busy_time, sch.totalDelay
 
 if __name__ == "__main__":
-    cores, cluster, shelfLimit = 32, False, 5
-    print(f'RUNNING FOR {cores} CORES! CLUSTER IS SET TO {cluster}. SHELF LIMIT IS SET TO {shelfLimit}')
+    cores, cluster, shelfLimit = 32, False, -1
+    print(f'RUNNING FOR {cores} CORES! CLUSTER IS SET TO {cluster}. SHELF LIMIT IS SET TO {shelfLimit if shelfLimit > 0 else None}')
 
     for wl in range(0, 16):
         print(f'WL:{wl:<5}', end='', flush=True)
