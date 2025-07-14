@@ -12,14 +12,9 @@ class edge_server():
         self.points = Points()
         self.jobs = []
         self.shelves = []
-        self.maxHeight = 0
         
         self.shelfLimit = shelfLimit
         self.category = None
-
-   
-    def calculate_max_height(self, height):
-        self.maxHeight = max(self.maxHeight, height)
         
 
     def update(self, time):

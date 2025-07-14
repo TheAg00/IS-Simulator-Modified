@@ -104,8 +104,8 @@ class Scheduler:
         remove_list = [] # Λίστα με άδειους servers που θα αφαιρέσουμε.
         for m in self.servers:
             self.total_bt += m.update(time) # Μετράμε το συνολικό busy time
-            if close_empty and m.points.head is None:
-                remove_list.append(m)
+            
+            if close_empty and m.points.head is None: remove_list.append(m)
         
         if close_empty and remove_list: self.servers = [x for x in self.servers if x not in remove_list]
   
