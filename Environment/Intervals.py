@@ -58,10 +58,13 @@ class Points:
         '''
         new_node = Node(time)
 
+        # Αν η λίστα είναι κενή, τοποθετεί το νεό node στην αρχή της λίστας με χρόνο έναρξης time.
         if self.head is None:
             self.head = new_node
             return
         
+        # Αν ο χρόνος εκτέλεσης του node είναι μικρότερος απ' αυτόν του head(αρχή λίστας),
+        # τότε το νέο node γίνεται το head.
         if time < self.head.time:
             new_node.next = self.head
             self.head = new_node
@@ -70,16 +73,19 @@ class Points:
         current_node = self.head
 
         # prevents adding a duplicate point whose value is equal to the head (future conditions start after head)
-        if current_node.time == time:
-            return
+        if current_node.time == time: return
         
+
+        # Βρίσκει την κατάλληλη χρονική στιγμή για να βάλει το node.
+        # Αν ο χρόνος του επόμενου node είναι μεγαλύτερος από το χρόνο του τωρινού node, αυτή είναι η θέση του.
         while current_node.next is not None:
-            if current_node.next.time == time:
-                return
-            elif current_node.next.time > time:
-                break
+            if current_node.next.time == time: return
+            
+            if current_node.next.time > time: break
+
             current_node = current_node.next
         
+        # Τοποθετείται το νέο node στη συνδεδεμένη λίστα.
         new_node.next = current_node.next
         new_node.requirements = current_node.requirements
         current_node.next = new_node
@@ -133,24 +139,27 @@ class Points:
             NOTE: If no point exists with timestamp 'time' time, the starting point of the interval that contains 
             'time' is updated to 'time' 
         '''
-        if self.head is None:
-            return 0
+
+        # Το head δείχνει το node το οποίο βρίσκεται 
+        if self.head is None: return 0 # Αν ισχύει, τότε η λίστα είναι άδεια.
         
         busy_time = 0
         current_node = self.head
         while current_node.next is not None:
             if current_node.time == time:
                 self.head = current_node
+
                 return busy_time
-            elif current_node.next.time > time:
+            
+            if current_node.next.time > time:
                 self.head = current_node
-                if current_node.requirements != 0:
-                    busy_time += time - current_node.time
+                if current_node.requirements != 0: busy_time += time - current_node.time
+                
                 self.head.time = time
+
                 return busy_time
         
-            if current_node.requirements != 0:
-                busy_time += current_node.next.time - current_node.time
+            if current_node.requirements != 0: busy_time += current_node.next.time - current_node.time
             
             current_node = current_node.next
         

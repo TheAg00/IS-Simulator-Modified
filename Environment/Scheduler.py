@@ -96,22 +96,23 @@ class Scheduler:
         server.add_shelf(shelf)
         self.servers.append(server)
 
-    # Συγχρονίζει τις καταστάσεις του μηχανήματος με βάση τον παρεχόμενο χρόνο.
-    # Αυτό περιλαμβάνει τον υπολογισμό του makespan του κάθε μηχανήματος, την κατάργηση
-    # ολοκληρωμένων διεργασιών και την απόφαση εάν ένα μηχάνημα θα πρέπει να
-    # τερματιστεί. Τα μηχανήματα που δεν είναι πλέον ενεργά αφαιρούνται από το σύστημα.
+    
+    # Υπολογίζουμε το busy time για κάθε server που εκτελεί κάποια εργασία και καταργούμε τους servers που είναι άδειοι.
     def update_all(self, time, close_empty=False):
-        remove_list = [] # Λίστα με άδειους servers που θα αφαιρέσουμε.
+        remove_list = [] # Λίστα με τους servers που θα καταργήσουμε.
+
+        # Μπαίνει μόνο όταν υπάρχουν servers με εργασίες μέσα.
         for m in self.servers:
             self.total_bt += m.update(time) # Μετράμε το συνολικό busy time
             
             if close_empty and m.points.head is None: remove_list.append(m)
         
+        # Καταργούμε τους άδειους servers.
         if close_empty and remove_list: self.servers = [x for x in self.servers if x not in remove_list]
   
     def run(self, jobs):
         for j in jobs:
-            self.update_all(0, close_empty=True)
+            self.update_all(j.ar, close_empty=True)
             self.algorithm.pack(j)
 
         for m in self.servers:
