@@ -189,7 +189,7 @@ class Points:
     def check_fit(self, start, end, requirements, capacity):
         '''
             Checks if an interval can be added to the list.
-            An interval can be added iff all overlaying points do not exceed
+            An interval can be added if all overlaying points do not exceed
             capacity when the intervals requirements are added to them.
         '''
         current_node = self.head

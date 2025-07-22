@@ -2,18 +2,18 @@ from Environment.EdgeServer import edge_server
 import functions as f
 
 from copy import deepcopy
+import math
 
 class Scheduler:
-    def __init__(self, wl, cores, alg, shelfLimit):
+    def __init__(self, wl, cores, alg, serverLimit):
         self.cores = cores
         self.alg = alg
         self.wl = wl
-        self.shelfLimit = shelfLimit
+        self.serverLimit = serverLimit # Περιορισμός στο πόσους servers μπορούμε να χρησιμοποιήσουμε.
 
         self.servers = []
         self.total_bt = 0
         self.total_servers = 0
-        self.totalDelay = 0
 
         self.algorithm = None
         self.set_algorithm(alg, workload=self.wl)
@@ -77,6 +77,7 @@ class Scheduler:
         copy = Scheduler(self.wl, self.cores, self.alg)
         copy.total_bt = self.total_bt
         copy.total_servers = self.total_servers
+
         # Set to None to trigger an error when attempting to use a cloned scheduler
         # without explicitly setting the alg to prevent logical errors
         copy.algorithm = None 
@@ -85,13 +86,13 @@ class Scheduler:
         return copy
 
     def add_server(self, job, category=None):
-        server = edge_server(self.cores, len(self.servers) + 1, self.shelfLimit)
+        server = edge_server(self.cores, len(self.servers) + 1)
         server.category = category
         server.add_job(job)
         self.servers.append(server)
     
     def add_server_shelves(self, shelf, category = None):
-        server = edge_server(self.cores, len(self.servers) + 1, self.shelfLimit)
+        server = edge_server(self.cores, len(self.servers) + 1)
         server.category = category
         server.add_shelf(shelf)
         self.servers.append(server)
@@ -103,22 +104,22 @@ class Scheduler:
 
         # Μπαίνει μόνο όταν υπάρχουν servers με εργασίες μέσα.
         for m in self.servers:
-            self.total_bt += m.update(time) # Μετράμε το συνολικό busy time
+            self.total_bt += m.update_shelf(time) # Μετράμε το συνολικό busy time
             
             if close_empty and m.points.head is None: remove_list.append(m)
         
         # Καταργούμε τους άδειους servers.
         if close_empty and remove_list: self.servers = [x for x in self.servers if x not in remove_list]
-  
+        
+
     def run(self, jobs):
         for j in jobs:
             self.update_all(j.ar, close_empty=True)
             self.algorithm.pack(j)
 
-        for m in self.servers:
-            self.total_bt += m.measure_remaining_busy_time()
-        
-        return self.total_bt
+        for m in self.servers: self.total_bt += m.measure_remaining_busy_time()
+
+        return math.ceil    (self.total_bt)
     
     def measure_to_end(self):
         busy_time_to_end = 0

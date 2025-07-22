@@ -6,15 +6,15 @@ class edge_server():
         A wrapper around Points utilising the interval logic defined
         there to model a processor processing a workload 
     '''
-    def __init__(self, capacity, id=-1, shelfLimit  = -1):
+    def __init__(self, capacity, id=-1):
         self.capacity = capacity
         self.index = id
         self.points = Points()
         self.jobs = []
         self.shelves = []
         
-        self.shelfLimit = shelfLimit
         self.category = None
+        self.serverFinishTime = 0
         
 
     def update(self, time):
@@ -50,8 +50,12 @@ class edge_server():
                 break
 
         while self.shelves:
+            currentShelf = self.shelves[0][1]
             if self.shelves[0][0] < time:
-                heapq.heappop(self.jobs)
+                heapq.heappop(self.shelves)
+            elif currentShelf.ar < time:
+                currentShelf.remainingHeight = currentShelf.height - (time - currentShelf.ar)
+                break
             else:
                 break
             

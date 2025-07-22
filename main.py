@@ -3,7 +3,7 @@ import functions as f
 
 def main(config):
     # initialise a scheduler (effectively our simulation environment)
-    sch = Scheduler(config['wl'], config['cores'], config['alg'], config['shelfLimit'])
+    sch = Scheduler(config['wl'], config['cores'], config['alg'], config['serverLimit'])
 
     # returns a list of all the jobs in the workload([arrival, finish time, duration, requirements])
     jobs = f.parse_workload(config['wl'], cluster=config['cluster'], cores=config['cores'])
@@ -11,11 +11,11 @@ def main(config):
     # schedules the workload
     busy_time = sch.run(jobs)
 
-    return busy_time, sch.totalDelay
+    return busy_time
 
 if __name__ == "__main__":
-    cores, cluster, shelfLimit = 32, False, 5
-    print(f'RUNNING FOR {cores} CORES! CLUSTER IS SET TO {cluster}. SHELF LIMIT IS SET TO {shelfLimit if shelfLimit > 0 else None}')
+    cores, cluster, serverLimit = 8, False, None
+    print(f'RUNNING FOR {cores} CORES! CLUSTER IS SET TO {cluster}. SERVER LIMIT IS SET TO {serverLimit}')
 
     for wl in range(0, 16):
         print(f'WL:{wl:<5}', end='', flush=True)
@@ -26,9 +26,9 @@ if __name__ == "__main__":
                 "cores": cores,
                 "alg": alg,
                 "cluster": cluster,
-                "shelfLimit": shelfLimit
+                "serverLimit": serverLimit
             }
-            result, totalDelay = main(config)
+            result = main(config)
             print(f'{alg}:{result:<10}', end=' ', flush=True)
         print()
 
