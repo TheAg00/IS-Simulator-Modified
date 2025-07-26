@@ -94,11 +94,10 @@ class Improved_MS:
             for _, shelf in server.shelves:
                 if math.isclose(shelf.height, upperBound) and shelf.shelfFit(s):
                     # Αν ο χώρος του shelf για να μπει το task δεν επαρκεί(π.χ. είναι στη μέση της εκτέλεσης) ψάχνουμε για άλλο shelf.
-                    if shelf.remainingHeight <= p: break
+                    if shelf.remainingHeight >= p: 
+                        shelf.add_job(job) # Προσθέτουμε την εργασία στο shelf.
 
-                    shelf.add_job(job) # Προσθέτουμε την εργασία στο shelf.
-
-                    return
+                        return
     
         # Αν δεν μπορεί να τοποθετηθεί σε ήδη υπάρχον ράφι, δημιουργούμε ένα καινούριο πάνω απ' το τρέχον.
         new_shelf = Shelf(self.scheduler, upperBound, maxCores, job.ar)
