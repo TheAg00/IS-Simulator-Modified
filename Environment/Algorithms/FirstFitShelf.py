@@ -40,7 +40,7 @@ class FirstFitShelf:
                 earliestFinishTimeServer = server
 
 
-            # Ελέγχουμε αν η εργασία χωράει στο server.
+            # Ελέγχουμε αν το shelf χωράει στο server.
             if server.check_fit(shelf):
                 server.add_shelf(shelf)
                 return 
