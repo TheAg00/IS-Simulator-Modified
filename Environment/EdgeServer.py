@@ -37,8 +37,7 @@ class edge_server():
     def update_shelf(self, time):
         '''
             Simulates the progression of time for the processor.
-            Removes completed jobs and their associated intervals. Partially completed jobs 
-            remain in the list although their intervals are shrieked to start at 'time'
+            The same as update, but for shelves.
         '''
         busy_time = self.points.move_to_time(time)
         
@@ -84,11 +83,10 @@ class edge_server():
         heapq.heappush(self.shelves, (shelf.fin, shelf))
         self.points.insert_interval(shelf.ar, shelf.fin, shelf.req)
 
-    # def add_job(self, job):
-    #     '''
-    #         Implements the logic for adding a job to the set of points
-    #     '''
-    #     heapq.heappush(self.jobs, (job.fin, job))
-        
-    #     self.points.insert_interval(job.ar, job.fin, job.req)
+    def add_job(self, job):
+        '''
+            Implements the logic for adding a job to the set of points
+        '''
+        heapq.heappush(self.jobs, (job.fin, job))
+        self.points.insert_interval(job.ar, job.fin, job.req)
         

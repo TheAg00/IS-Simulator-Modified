@@ -5,11 +5,10 @@ from copy import deepcopy
 import math
 
 class Scheduler:
-    def __init__(self, wl, cores, alg, serverLimit):
+    def __init__(self, wl, cores, alg):
         self.cores = cores
         self.alg = alg
         self.wl = wl
-        self.serverLimit = serverLimit # Περιορισμός στο πόσους servers μπορούμε να χρησιμοποιήσουμε.
 
         self.servers = []
         self.total_bt = 0
@@ -104,7 +103,10 @@ class Scheduler:
 
         # Μπαίνει μόνο όταν υπάρχουν servers με εργασίες μέσα.
         for m in self.servers:
-            self.total_bt += m.update_shelf(time) # Μετράμε το συνολικό busy time
+            if self.alg == 'Improved_MS_Varaince_LOW' or self.alg == 'Improved_MS_Varaince_HIGH':
+                self.total_bt += m.update_shelf(time) # Μετράμε το συνολικό busy time
+            else:
+                self.total_bt += m.update(time)
             
             if close_empty and m.points.head is None: remove_list.append(m)
         
@@ -113,13 +115,15 @@ class Scheduler:
         
 
     def run(self, jobs):
+        totalJobs = 0
         for j in jobs:
             self.update_all(j.ar, close_empty=True)
             self.algorithm.pack(j)
 
+
         for m in self.servers: self.total_bt += m.measure_remaining_busy_time()
 
-        return math.ceil    (self.total_bt)
+        return math.ceil(self.total_bt)
     
     def measure_to_end(self):
         busy_time_to_end = 0

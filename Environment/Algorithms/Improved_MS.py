@@ -1,7 +1,6 @@
 from Environment.Moldable_task_model import *
 from Environment.Algorithms.FirstFitShelf import FirstFitShelf
 
-
 import random
 import math
 
