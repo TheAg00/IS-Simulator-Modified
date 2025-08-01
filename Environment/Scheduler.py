@@ -115,8 +115,9 @@ class Scheduler:
         
 
     def run(self, jobs):
-        totalJobs = 0
         for j in jobs:
+            if self.alg != 'Improved_MS_Varaince_LOW' and self.alg != 'Improved_MS_Varaince_HIGH': 
+                pass
             self.update_all(j.ar, close_empty=True)
             self.algorithm.pack(j)
 

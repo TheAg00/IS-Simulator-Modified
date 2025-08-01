@@ -18,7 +18,7 @@ class Graphs:
             
             plt.title(f'Workload: {self.wlNames[row]}. Cores: {self.cores}.')
             plt.xlabel("Algorithms")
-            plt.ylabel("Busy Time")
+            plt.ylabel("Normalized Busy Time")
 
             plt.ylim(0, 1.1)
             plt.xticks(rotation=30, ha='right')
