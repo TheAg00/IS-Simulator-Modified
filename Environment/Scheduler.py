@@ -1,14 +1,18 @@
 from Environment.EdgeServer import edge_server
+from Environment.Moldable_task_model import *
 import functions as f
+
 
 from copy import deepcopy
 import math
+import random
 
 class Scheduler:
-    def __init__(self, wl, cores, alg):
+    def __init__(self, wl, cores, alg, variance):
         self.cores = cores
         self.alg = alg
         self.wl = wl
+        self.variance = variance
 
         self.servers = []
         self.total_bt = 0
@@ -60,7 +64,7 @@ class Scheduler:
                 from Environment.Algorithms.BF_mat import BF_MAT
                 self.alg = "BFAT"
                 self.algorithm = BF_MAT(self)
-            case 'Improved_MS_Varaince_LOW' | 'Improved_MS_Varaince_HIGH':
+            case 'Improved_MS':
                 from Environment.Algorithms.Improved_MS import Improved_MS
                 self.alg = alg
                 self.algorithm = Improved_MS(self)
@@ -103,7 +107,7 @@ class Scheduler:
 
         # Μπαίνει μόνο όταν υπάρχουν servers με εργασίες μέσα.
         for m in self.servers:
-            if self.alg == 'Improved_MS_Varaince_LOW' or self.alg == 'Improved_MS_Varaince_HIGH':
+            if self.alg == 'Improved_MS':
                 self.total_bt += m.update_shelf(time) # Μετράμε το συνολικό busy time
             else:
                 self.total_bt += m.update(time)
@@ -113,11 +117,36 @@ class Scheduler:
         # Καταργούμε τους άδειους servers.
         if close_empty and remove_list: self.servers = [x for x in self.servers if x not in remove_list]
         
+    # Μετατρέπουμε τις εργασίες των μη moldable αλγορίθμων(π.χ. first fit) σε moldable,
+    # ώστε οι συγκρίσεις που θα κάνουμε να αναπαριστούν το βέλτιστο busy time κάθε φορά.
+    def makeMoldable(self, job):
+        averageParallelism = job.req # Απαιτήσεις σε πυρήνες της εργασίας
+
+        # Μετατρέπουμε σε moldable τις εργασίες με χαμηλή διακύμανση. 
+        if self.variance == 'LOW':
+            sigma = random.uniform(0, 1)
+            optimalCores = optimal_coresLOW(averageParallelism, sigma, self.cores)
+            newDur = math.ceil(duration_with_nLOW(job, averageParallelism, optimalCores, sigma))
+
+            job.req = optimalCores
+            job.dur = newDur
+
+            return
+
+        # Μετατρέπουμε σε moldable τις εργασίες με υψηλή διακύμανση.
+        sigma = random.uniform(1.01, 10)
+        optimalCores = optimal_coresHIGH(averageParallelism, sigma, self.cores)
+        newDur = math.ceil(duration_with_nHIGH(job, averageParallelism, optimalCores, sigma))
+
+        job.req = optimalCores
+        job.dur = newDur
+
+        return
 
     def run(self, jobs):
         for j in jobs:
-            if self.alg != 'Improved_MS_Varaince_LOW' and self.alg != 'Improved_MS_Varaince_HIGH': 
-                pass
+            if self.alg != 'Improved_MS': self.makeMoldable(j)
+                
             self.update_all(j.ar, close_empty=True)
             self.algorithm.pack(j)
 

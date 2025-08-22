@@ -7,7 +7,6 @@ import math
 class Improved_MS:
     def __init__(self, scheduler):
         self.scheduler = scheduler
-        self.varianceModel = "low" if self.scheduler.alg == 'Improved_MS_Varaince_LOW' else "high"
 
         self.alpha = None
         self.beta = 1.56
@@ -23,7 +22,7 @@ class Improved_MS:
         averageParallelism = job.req # Απαιτήσεις σε πυρήνες που θέλει η εργασία για το συγκεκριμένο duration.
         for currentCores in range(1, self.scheduler.cores + 1):
             # Το sigma παίρνει τυχαία τιμή στο διάστημα [0, 1] αν είναι low variance και [1.01, 10] αν είναι high variance.
-            if self.varianceModel == "low":
+            if self.scheduler.variance == "LOW":
                 sigma = random.uniform(0, 1)
                 newDur = math.ceil(duration_with_nLOW(job, averageParallelism, currentCores, sigma))
             else:
