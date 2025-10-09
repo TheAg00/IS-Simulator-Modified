@@ -11,21 +11,24 @@ class Graphs:
         self.wl = wl
         self.wlNames = wlNames
 
+        self.averageNormalisedBusyTime = []
+
     def createGraph(self, normalisedBusyTimeList):   
         for row in range(len(normalisedBusyTimeList)):
 
             plt.figure(figsize=(10, 6))
+            plt.rcParams.update({'font.size': 14})
             plt.bar(self.algs, normalisedBusyTimeList[row], color=['red', 'green', 'blue', 'orange', 'purple', 'cyan'])
             
             plt.title(f'Workload: {self.wlNames[row]}. Cores: {self.cores}. Variance: {self.variance}')
             plt.xlabel("Algorithms")
-            plt.ylabel("Normalized Busy Time")
+            plt.ylabel("Normalised Busy Time")
 
             plt.ylim(0, 1.1)
             plt.xticks(rotation=30, ha='right')
             plt.tight_layout()
 
-            savePath = f'./Charts/Graphs/barplot_wl_{self.wl[row]}_cores_{self.cores}_variance_{self.variance}.png'
+            savePath = f'./Charts/Graphs/{self.variance}/barplot_wl_{self.wl[row]}_cores_{self.cores}_variance_{self.variance}.png'
             plt.savefig(savePath)
 
 

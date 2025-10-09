@@ -14,7 +14,6 @@ class edge_server():
         self.shelves = []
         
         self.category = None
-        self.serverFinishTime = 0
         
 
     def update(self, time):

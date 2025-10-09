@@ -77,7 +77,7 @@ class Scheduler:
         self.total_servers = 0
 
     def clone(self):
-        copy = Scheduler(self.wl, self.cores, self.alg)
+        copy = Scheduler(self.wl, self.cores, self.alg, self.variance)
         copy.total_bt = self.total_bt
         copy.total_servers = self.total_servers
 

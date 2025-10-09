@@ -3,7 +3,6 @@ import functions as f
 from Charts.Graphs import Graphs
 
 
-
 def main(config):
     # initialise a scheduler (effectively our simulation environment)
     sch = Scheduler(config['wl'], config['cores'], config['alg'], config['variance'])
@@ -17,7 +16,7 @@ def main(config):
     return busy_time
 
 if __name__ == "__main__":
-    cores, cluster, variacne = 32, False, 'LOW'
+    cores, cluster, variacne = 32, False, 'HIGH'
     print(f'RUNNING FOR {cores} CORES! CLUSTER IS SET TO {cluster}. VARIANCE IS {variacne}')
 
     workloadToParse = [2, 4, 8, 9, 15, 16, 17, 18, 19, 20, 21, 22]
@@ -40,13 +39,15 @@ if __name__ == "__main__":
             result = main(config)
             print(f'{alg}:{result:<10}', end=' ', flush=True)
             workloadData.append(result)
-
+            
         allWorkloadData.append(workloadData)
         
         print()
     
-    
-    filePathCSV = './Charts/Data/data_cores_' + str(cores) + '.csv'
 
-    chart = Graphs(filePathCSV, algorithmsToParse, cores, variacne, workloadToParse, workloadNames)
-    chart.createCSV(allWorkloadData, filePathCSV)
+    # Ο παρακάτω κώδικας χρησιμοποιείθηκε για τη δημιουργία των γράφων και csv αρχείο με τα busy times που παράγει ο κάθε αλγόριθμος.
+    # Τα αποτελέσματα βρίσκονται στο φάκελο Charts και δε χειάζεται να τρέχει κάθε φορά γι' αυτό είναι σε σχόλια.
+    
+    # filePathCSV = './Charts/Data/data_cores_' + str(cores) + '.csv'
+    # chart = Graphs(filePathCSV, algorithmsToParse, cores, variacne, workloadToParse, workloadNames)
+    # chart.createCSV(allWorkloadData, filePathCSV)
